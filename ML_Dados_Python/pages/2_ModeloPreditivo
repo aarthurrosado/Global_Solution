@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -13,10 +12,12 @@ st.title('Modelagem Preditiva de Risco de Deslizamento')
 
 df = _criar_dados()
 
-
+# Mapear colunas categóricas
 df['Chuva'] = df['Chuva'].map({'Sem chuva': 0, 'Chovendo': 1})
 df['Tipo de Solo'] = df['Tipo de Solo'].map({'Arenoso': 2, 'Argiloso': 1, 'Rochoso': 0})
 df['Inclinação'] = df['Inclinação'].map({'Leve': 0, 'Moderada': 1, 'Forte': 2})
+df['Região'] = df['Região'].map({'A': 0, 'B': 1, 'C': 2, 'D': 3})
+
 df.drop(columns=['Nivel de Risco'], inplace=True)  # Remover a variável de apoio
 
 st.sidebar.title('Filtros de Dados')
@@ -42,7 +43,7 @@ st.dataframe(df_filtered.head())
 X = df_filtered.drop(columns=['Risco'])
 y = df_filtered['Risco']
 
-
+# Checar se tem dados suficientes
 if len(X) < 2:
     st.warning('Poucos dados para treinar. Ajuste os filtros.')
     st.stop()
@@ -50,10 +51,10 @@ if len(X) < 2:
 # Treinamento
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 model = RandomForestRegressor(
-    n_estimators=100,        
-    max_depth=10,            
-    min_samples_leaf=5,      
-    max_features='sqrt',      
+    n_estimators=100,         # padrão ótimo para maioria dos casos
+    max_depth=10,             # evita árvores profundas demais
+    min_samples_leaf=5,       # impede que folhas tenham só 1 amostra
+    max_features='sqrt',      # boa prática para diminuir overfitting
     random_state=42
 )
 model.fit(X_train, y_train)
